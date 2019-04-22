@@ -20,11 +20,22 @@ pkg_check_modules(glib2 glib-2.0 REQUIRED)
 include_directories(${glib2_INCLUDE_DIRS})
 set(LIBS ${LIBS} ${glib2_LIBRARIES})
 
-add_executable(client src/client.cpp src/ByteBuffer.cpp)
-target_link_libraries(client ${LIBS})
 
-add_executable(sync_server src/sync_server.cpp src/ByteBuffer.cpp)
-target_link_libraries(sync_server ${LIBS})
+set(common_SRCS
+        src/common.cpp
+        src/ByteBuffer.cpp
+        )
 
-add_executable(async_server src/async_server.cpp src/ByteBuffer.cpp)
-target_link_libraries(async_server ${LIBS})
+
+add_library(comm++ ${common_SRCS})
+target_link_libraries(comm++ ${LIBS})
+
+
+add_executable(client src/client.cpp)
+target_link_libraries(client comm++ ${LIBS})
+
+add_executable(sync_server src/sync_server.cpp)
+target_link_libraries(sync_server comm++ ${LIBS})
+
+add_executable(async_server src/async_server.cpp)
+target_link_libraries(async_server comm++ ${LIBS})

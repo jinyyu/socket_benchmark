@@ -6,6 +6,7 @@
 #include <memory>
 #include <thread>
 #include "ByteBuffer.h"
+#include <atomic>
 
 
 #ifdef DEBUG
@@ -15,24 +16,29 @@
 #endif
 
 
+static std::atomic<int> g_connections(-1);
+
 struct Session: public std::enable_shared_from_this<Session>
 {
     explicit Session(boost::asio::io_service& io_service)
         : socket_(io_service)
     {
         read_buffer_.resize(4);
+        g_connections++;
     }
 
     ~Session()
     {
         LOG_DEBUG("session closed");
+        g_connections--;
     }
 
     void read_size()
     {
         auto self = shared_from_this();
-        auto buffer = boost::asio::buffer(read_buffer_.data(), read_buffer_.size());
+        auto buffer = boost::asio::buffer(read_buffer_.data(), 4);
         auto handler = [self](const boost::system::error_code& error, size_t bytes) {
+            LOG_DEBUG("-----------");
             if (bytes == 0) {
                 return;
             }
@@ -64,7 +70,7 @@ struct Session: public std::enable_shared_from_this<Session>
         }
 
         auto self = shared_from_this();
-        auto buffer = boost::asio::buffer(read_buffer_.data(), read_buffer_.size());
+        auto buffer = boost::asio::buffer(read_buffer_.data(), bytes);
         auto handler = [self, bytes](const boost::system::error_code& error, size_t n_read) {
             if (bytes == 0) {
                 return;
@@ -185,6 +191,8 @@ int main(int argc, char* argv[])
 
     while (true) {
         ::sleep(1);
+        int n = g_connections;
+        LOG_DEBUG("connections %u", n);
     }
 }
 
