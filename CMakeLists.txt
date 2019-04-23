@@ -32,10 +32,6 @@ set(common_SRCS
 add_library(comm++ ${common_SRCS})
 target_link_libraries(comm++ ${LIBS})
 
-
-add_executable(client src/client.cpp)
-target_link_libraries(client comm++ ${LIBS})
-
 add_executable(sync_server src/sync_server.cpp)
 target_link_libraries(sync_server comm++ ${LIBS})
 
