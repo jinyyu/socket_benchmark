@@ -242,7 +242,7 @@ int main(int argc, char* argv[])
 
     GOptionEntry entries[] = {
         {"threads", 't', 0, G_OPTION_ARG_INT, &threads, "threads ", NULL},
-        {"port", '0', 0, G_OPTION_ARG_INT, &threads, "port ", NULL},
+        {"port", '0', 0, G_OPTION_ARG_INT, &port, "port ", NULL},
         {NULL}
     };
 
@@ -253,8 +253,6 @@ int main(int argc, char* argv[])
         fprintf(stderr, "option parsing failed: %s\n", error->message);
         exit(EXIT_FAILURE);
     }
-
-    threads = 4;
 
     LOG_DEBUG("threads %d, port %d", threads, port);
 
