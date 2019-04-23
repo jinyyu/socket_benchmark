@@ -214,7 +214,7 @@ private:
 
         acceptor_.async_accept(session->socket_, [this, session](const boost::system::error_code& error) {
             if (error) {
-                LOG_DEBUG("accept error %s", error.message().c_str());
+                LOG_WARN("accept error %s", error.message().c_str());
                 return;
             }
             this->start_accept();
