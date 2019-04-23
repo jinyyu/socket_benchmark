@@ -43,7 +43,7 @@ struct Session: public std::enable_shared_from_this<Session>
                 return;
             }
             if (error) {
-                LOG_DEBUG("read error %s", error.message().c_str());
+                LOG_WARN("read error %s", error.message().c_str());
                 return;
             }
 
@@ -58,7 +58,7 @@ struct Session: public std::enable_shared_from_this<Session>
         uint8_t* start = read_buffer_;
         uint8_t* end = read_buffer_ + bytes;
         int err = REDIS_OK;
-        std::vector<struct redisReply*> replays;
+        std::vector<struct redisReply*> replies;
 
         while (start < end) {
             uint8_t* p = (uint8_t*) memchr(start, '\n', bytes);
@@ -69,31 +69,31 @@ struct Session: public std::enable_shared_from_this<Session>
             size_t n = p + 1 - start;
             err = redisReaderFeed(reader_, (const char*) start, n);
             if (err != REDIS_OK) {
-                LOG_DEBUG("redis protocol error %d, %s", err, reader_->errstr);
+                LOG_WARN("redis protocol error %d, %s", err, reader_->errstr);
                 break;
             }
 
             struct redisReply* reply = NULL;
             err = redisReaderGetReply(reader_, (void**) &reply);
             if (err != REDIS_OK) {
-                LOG_DEBUG("redis protocol error %d, %s", err, reader_->errstr);
+                LOG_WARN("redis protocol error %d, %s", err, reader_->errstr);
                 break;
             }
             if (reply) {
-                replays.push_back(reply);
+                replies.push_back(reply);
             }
 
             start += n;
             bytes -= n;
         }
         if (err == REDIS_OK) {
-            for (struct redisReply* reply : replays) {
+            for (struct redisReply* reply : replies) {
                 on_redis_reply(reply);
             }
             this->start();
         }
 
-        for (struct redisReply* reply : replays) {
+        for (struct redisReply* reply : replies) {
             freeReplyObject(reply);
         }
     }
@@ -154,7 +154,7 @@ struct Session: public std::enable_shared_from_this<Session>
                 return;;
             }
             if (error) {
-                LOG_DEBUG("send error %s", error.message().c_str());
+                LOG_WARN("send error %s", error.message().c_str());
                 return;
             }
             std::string str((const char*) self->send_buffer_.reader(), bytes);
@@ -232,7 +232,7 @@ typedef std::shared_ptr<Server> ServerPtr;
 int main(int argc, char* argv[])
 {
 
-    int threads = 8;
+    int threads = 1;
     int port = 4096;
 
     GOptionEntry entries[] = {

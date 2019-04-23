@@ -48,6 +48,10 @@ public:
             if (n == 0) {
                 break;
             }
+            if (n < 0) {
+                LOG_WARN("read error %s", strerror(errno));
+                break;
+            }
 
             read_pos_ += n;
 
@@ -56,7 +60,8 @@ public:
             if (!send_buff_.empty()) {
                 int ret = flush_send();
                 if (ret != send_buff_.size()) {
-                    LOG_DEBUG("flush send error %s", strerror(errno));
+                    LOG_WARN("flush send error %s", strerror(errno));
+                    break;
                 }
                 send_buff_.clear();
             }
@@ -70,7 +75,7 @@ public:
         uint32_t bytes = read_pos_;
 
         int err = REDIS_OK;
-        std::vector<struct redisReply*> replays;
+        std::vector<struct redisReply*> replies;
 
         while (start < end) {
             uint8_t* p = (uint8_t*) memchr(start, '\n', bytes);
@@ -81,30 +86,30 @@ public:
             size_t n = p + 1 - start;
             err = redisReaderFeed(reader_, (const char*) start, n);
             if (err != REDIS_OK) {
-                LOG_DEBUG("redis protocol error %d, %s", err, reader_->errstr);
+                LOG_WARN("redis protocol error %d, %s", err, reader_->errstr);
                 break;
             }
 
             struct redisReply* reply = NULL;
             err = redisReaderGetReply(reader_, (void**) &reply);
             if (err != REDIS_OK) {
-                LOG_DEBUG("redis protocol error %d, %s", err, reader_->errstr);
+                LOG_WARN("redis protocol error %d, %s", err, reader_->errstr);
                 break;
             }
             if (reply) {
-                replays.push_back(reply);
+                replies.push_back(reply);
             }
 
             start += n;
             bytes -= n;
         }
         if (err == REDIS_OK) {
-            for (struct redisReply* reply : replays) {
+            for (struct redisReply* reply : replies) {
                 on_redis_reply(reply);
             }
         }
 
-        for (struct redisReply* reply : replays) {
+        for (struct redisReply* reply : replies) {
             freeReplyObject(reply);
         }
     }
@@ -193,14 +198,13 @@ public:
 
     ~Server()
     {
-        if (server_) {
-            close(server_);
-        }
+        close(server_);
+
     }
 
     void run()
     {
-        int server_ = socket(AF_INET, SOCK_STREAM, 0);
+        server_ = socket(AF_INET, SOCK_STREAM, 0);
         if (server_ == -1) {
             LOG_ERROR("socket error %s", strerror(errno));
         }
@@ -218,7 +222,7 @@ public:
         }
 
         if (::listen(server_, SOMAXCONN) < 0) {
-            LOG_DEBUG("lisetn error %s", strerror(errno));
+            LOG_ERROR("lisetn error %s", strerror(errno));
         }
 
         while (true) {
