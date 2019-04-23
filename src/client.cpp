@@ -193,7 +193,7 @@ int main(int argc, char* argv[])
     int sessions = 16;
     int msg_size = 100;
     int threads = 8;
-    const char* addr = "127.0.0.1:4096";
+    const char* addr = "192.168.147.134:4096";
 
     GOptionEntry entries[] = {
         {"sessions", 'c', 0, G_OPTION_ARG_INT, &sessions, "sessions", NULL},

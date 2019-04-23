@@ -3,7 +3,6 @@ project(socket_benchmark)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_definitions(-Wall)
 add_definitions(-DDEBUG)
 
 include_directories(${CMAKE_SOURCE_DIR})
@@ -16,9 +15,12 @@ set(LIBS
         Boost::system)
 
 find_package(PkgConfig REQUIRED)
-pkg_check_modules(glib2 glib-2.0 REQUIRED)
-include_directories(${glib2_INCLUDE_DIRS})
-set(LIBS ${LIBS} ${glib2_LIBRARIES})
+pkg_check_modules(thr
+        glib-2.0 REQUIRED
+        hiredis REQUIRED
+        )
+include_directories(${thr_INCLUDE_DIRS})
+set(LIBS ${LIBS} ${thr_LIBRARIES})
 
 
 set(common_SRCS
