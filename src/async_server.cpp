@@ -63,6 +63,7 @@ struct Session: public std::enable_shared_from_this<Session>
         while (start < end) {
             uint8_t* p = (uint8_t*) memchr(start, '\n', bytes);
             if (!p) {
+                this->start();
                 break;
             }
 
