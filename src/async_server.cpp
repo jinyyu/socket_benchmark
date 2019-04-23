@@ -23,7 +23,8 @@ struct Session: public std::enable_shared_from_this<Session>
         : socket_(io_service),
           reader_(redisReaderCreate())
     {
-
+        LOG_DEBUG("nenw session");
+        g_connections++;
     }
 
     ~Session()
@@ -31,12 +32,6 @@ struct Session: public std::enable_shared_from_this<Session>
         LOG_DEBUG("session closed");
         g_connections--;
         redisReaderFree(reader_);
-    }
-
-    void add_ref()
-    {
-        LOG_DEBUG("nenw session");
-        g_connections++;
     }
 
     void start()
@@ -223,7 +218,6 @@ private:
                 return;
             }
             this->start_accept();
-            session->add_ref();
             session->start();
         });
     }
@@ -269,7 +263,7 @@ int main(int argc, char* argv[])
 
     while (true) {
         ::sleep(1);
-        int n = g_connections;
+        int n = g_connections - threads;
         LOG_INFO("connections %u", n);
     }
 }
