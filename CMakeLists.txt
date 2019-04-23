@@ -3,7 +3,7 @@ project(socket_benchmark)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_definitions(-DDEBUG)
+#add_definitions(-DDEBUG)
 
 include_directories(${CMAKE_SOURCE_DIR})
 

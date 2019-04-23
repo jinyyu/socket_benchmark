@@ -25,11 +25,13 @@ public:
           read_pos_(0),
           reader_(redisReaderCreate())
     {
+        LOG_DEBUG("nenw session");
         g_connections++;
     }
 
     ~Session()
     {
+        LOG_DEBUG("session closed");
         --g_connections;
         ::close(fd_);
         redisReaderFree(reader_);
@@ -269,12 +271,12 @@ int main(int argc, char* argv[])
     });
     t.detach();
 
-    LOG_DEBUG("port %d", port);
+    LOG_INFO("port %d", port);
 
     while (true) {
         sleep(1);
         uint32_t n = g_connections;
-        LOG_DEBUG("connections %u", n);
+        LOG_INFO("connections %u", n);
     }
 }
 

@@ -11,7 +11,7 @@
 #else
 #define LOG_DEBUG(format, ...)
 #endif
-
+#define LOG_INFO(format, ...) { fprintf(stderr, "INFO [%s:%d] " format "\n", strrchr(__FILE__, '/') + 1, __LINE__, ##__VA_ARGS__); }
 #define LOG_WARN(format, ...) { fprintf(stderr, "WARN [%s:%d] " format "\n", strrchr(__FILE__, '/') + 1, __LINE__, ##__VA_ARGS__); }
 #define LOG_ERROR(format, ...) {  \
              fprintf(stderr, "ERROR [%s:%d] " format "\n", strrchr(__FILE__, '/') + 1, __LINE__, ##__VA_ARGS__); \

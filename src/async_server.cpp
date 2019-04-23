@@ -35,6 +35,7 @@ struct Session: public std::enable_shared_from_this<Session>
 
     void add_ref()
     {
+        LOG_DEBUG("nenw session");
         g_connections++;
     }
 
@@ -254,7 +255,7 @@ int main(int argc, char* argv[])
         exit(EXIT_FAILURE);
     }
 
-    LOG_DEBUG("threads %d, port %d", threads, port);
+    LOG_INFO("threads %d, port %d", threads, port);
 
 
     for (int i = 0; i < threads; ++i) {
@@ -269,7 +270,7 @@ int main(int argc, char* argv[])
     while (true) {
         ::sleep(1);
         int n = g_connections;
-        LOG_DEBUG("connections %u", n);
+        LOG_INFO("connections %u", n);
     }
 }
 
