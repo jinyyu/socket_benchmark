@@ -16,6 +16,8 @@
 #define RECEIVE_BUFFER_SIZE (1024 * 4)
 
 static std::atomic<uint32_t> g_connections(0);
+static std::atomic<uint64_t> g_read_bytes(0);
+static std::atomic<uint64_t> g_write_bytes(0);
 
 struct Session: public std::enable_shared_from_this<Session>
 {
@@ -47,6 +49,7 @@ struct Session: public std::enable_shared_from_this<Session>
                 return;
             }
 
+            g_read_bytes += bytes;
             self->handle_read(bytes);
 
         };
@@ -158,6 +161,9 @@ struct Session: public std::enable_shared_from_this<Session>
                 LOG_WARN("send error %s", error.message().c_str());
                 return;
             }
+
+            g_write_bytes += bytes;
+
             std::string str((const char*) self->send_buffer_.reader(), bytes);
             self->send_buffer_.read_bytes(bytes);
             self->start_send();
@@ -263,9 +269,17 @@ int main(int argc, char* argv[])
 
 
     while (true) {
+        g_read_bytes = 0;
+        g_write_bytes = 0;
+
         ::sleep(1);
+
+        uint64_t read_bytes = g_read_bytes;
+        uint64_t write_bytes = g_write_bytes;
+
         int n = g_connections - threads;
-        LOG_INFO("connections %u", n);
+
+        LOG_INFO("connections %u, read %lu MB, write %lu MB", n, read_bytes, write_bytes);
     }
 }
 

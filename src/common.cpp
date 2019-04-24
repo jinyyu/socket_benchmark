@@ -36,7 +36,7 @@ static std::string get_command(struct redisReply* reply)
 
     std::string key(reply->element[1]->str, reply->element[1]->len);
 
-    //std::lock_guard<std::mutex> lock(g_key_mut);
+    std::lock_guard<std::mutex> lock(g_key_mut);
 
     auto it = g_keys.find(key);
     if (it == g_keys.end()) {
@@ -70,7 +70,7 @@ static std::string set_command(struct redisReply* reply)
     std::string key(reply->element[1]->str, reply->element[1]->len);
     std::string value(reply->element[2]->str, reply->element[2]->len);
 
-    //std::lock_guard<std::mutex> lock(g_key_mut);
+    std::lock_guard<std::mutex> lock(g_key_mut);
 
     g_keys[key] = value;
     return shared::ok;

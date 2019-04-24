@@ -16,6 +16,8 @@
 #define RECEIVE_BUFFER_SIZE (1024 * 4)
 
 static std::atomic<uint32_t> g_connections(0);
+static std::atomic<uint64_t> g_read_bytes(0);
+static std::atomic<uint64_t> g_write_bytes(0);
 
 class Session
 {
@@ -52,6 +54,7 @@ public:
                 LOG_WARN("read error %s", strerror(errno));
                 break;
             }
+            g_read_bytes += n;
 
             read_pos_ += n;
 
@@ -170,6 +173,7 @@ public:
                 LOG_ERROR("send error %s", strerror(errno));
             }
 
+            g_write_bytes += n;
             pos += n;
         }
 
@@ -278,9 +282,17 @@ int main(int argc, char* argv[])
     LOG_INFO("port %d", port);
 
     while (true) {
+        g_read_bytes = 0;
+        g_write_bytes = 0;
+
         sleep(1);
+
+        uint64_t read_bytes = g_read_bytes;
+        uint64_t write_bytes = g_write_bytes;
+
         uint32_t n = g_connections;
-        LOG_INFO("connections %u", n);
+        LOG_INFO("connections %u, read %lu, write %lu", n, read_bytes, write_bytes);
+
     }
 }
 
