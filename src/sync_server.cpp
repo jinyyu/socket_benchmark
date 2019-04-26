@@ -140,14 +140,7 @@ public:
         }
 
         std::string command(reply->element[0]->str, reply->element[0]->len);
-        auto it = shared::g_command_table.find(command);
-        if (it == shared::g_command_table.end()) {
-            int n = snprintf(buffer, sizeof(buffer), shared::unknown_command, command.c_str());
-            send_reply(buffer, n);
-            return;
-        }
-        shared::CommandCallback& cb = it->second;
-        std::string str = cb(reply);
+        std::string str = redis_command(std::move(command));
         send_reply(str.data(), str.size());
     }
 

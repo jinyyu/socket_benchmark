@@ -1,10 +1,9 @@
 #pragma once
 #include <stdint.h>
 #include <hiredis/hiredis.h>
-#include <functional>
-#include <unordered_map>
 #include <stdio.h>
 #include <string.h>
+#include <string>
 
 #ifdef DEBUG
 #define LOG_DEBUG(format, ...) { fprintf(stderr, "DEBUG [%s:%d] " format "\n", strrchr(__FILE__, '/') + 1, __LINE__, ##__VA_ARGS__); }
@@ -18,10 +17,9 @@
              exit(-1); \
 }
 
-uint64_t timestamp_now();
-
 namespace shared
 {
+
 
 static const char* ok = "+OK\r\n";
 static const char* err = "-ERR %s\r\n";
@@ -31,7 +29,12 @@ static const char* wrong_number_arguments = "-ERR wrong number of arguments for 
 static const char* pong = "+PONG\r\n";
 static const char* null = "$-1\r\n";
 
-typedef std::function<std::string(struct redisReply* reply)> CommandCallback;
-extern std::unordered_map<std::string, CommandCallback> g_command_table;
 
 }
+
+uint64_t timestamp_now();
+
+
+void init_consumer_thread();
+
+std::string redis_command(std::string&& command);
